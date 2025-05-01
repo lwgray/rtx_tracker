@@ -24,13 +24,6 @@ import datetime
 # Create Flask app
 def create_flask_app():
     """Create the Flask application"""
-    app = Flask(__name__)
-    return app
-
-# Web dashboard 
-def create_web_dashboard():
-    """Create and start the web dashboard"""
-    # Create a Flask app
     app = Flask(
         __name__,
         static_folder='static',
@@ -157,9 +150,15 @@ def create_web_dashboard():
     def static_files(filename):
         return send_from_directory(app.static_folder, filename)
     
-    # Start the Flask app
+    return app
+
+# Run Flask app only
+def run_flask():
+    """Start the Flask web application without additional services"""
+    logger.info("Starting Flask web interface")
+    app = create_flask_app()
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 # Main entry point
 if __name__ == "__main__":
@@ -181,6 +180,7 @@ if __name__ == "__main__":
     parser.add_argument('--dashboard', action='store_true', help='Start the web dashboard')
     parser.add_argument('--dash', action='store_true', help='Start the Dash analytics dashboard')
     parser.add_argument('--monitor', action='store_true', help='Start the monitoring system')
+    parser.add_argument('--flask', action='store_true', help='Start only the Flask web interface')
     parser.add_argument('--export', action='store_true', help='Export data to CSV files')
     parser.add_argument('--days', type=int, default=30, help='Number of days for export or charts')
     parser.add_argument('--ml-models', action='store_true', help='Train machine learning models')
@@ -214,9 +214,14 @@ if __name__ == "__main__":
         # Import and run the Dash app directly
         from web.dashboard import app as dash_app
         dash_app.run(debug=True, host='0.0.0.0', port=8050)
+    elif args.flask:
+        # New option to run only the Flask interface
+        run_flask()
     elif args.dashboard:
         logger.info("Starting web dashboard")
-        create_web_dashboard()
+        app = create_flask_app()
+        port = int(os.environ.get('PORT', 5000))
+        app.run(host='0.0.0.0', port=port)
     elif args.monitor:
         logger.info("Starting monitoring service")
         monitor_rtx_5090()  # Run once
@@ -231,4 +236,6 @@ if __name__ == "__main__":
         monitor_thread.start()
         
         # Start dashboard in main thread
-        create_web_dashboard()
+        app = create_flask_app()
+        port = int(os.environ.get('PORT', 5000))
+        app.run(host='0.0.0.0', port=port)
