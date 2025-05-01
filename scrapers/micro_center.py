@@ -79,11 +79,11 @@ def extract_price(soup):
         if price_elem:
             price_text = price_elem.text.strip()
             # Remove currency symbol and commas, then convert to float
-            price_text = ''.join(c for c in price_text if c.isdigit() or c == '.')
-            try:
-                return float(price_text)
-            except:
-                continue
+            price_text = price_text.replace('$', '').replace(',', '')
+            # Extract first valid price pattern if there are multiple
+            price_match = re.search(r'([0-9]+\.[0-9]+)', price_text)
+            if price_match:
+                return float(price_match.group(1))
     
     # Try looking for price in JSON data
     for script in soup.find_all('script'):
@@ -309,9 +309,12 @@ def scrape_micro_center(session, retailer):
                 price = None
                 if price_elem:
                     price_text = price_elem.text.strip()
-                    # Remove currency symbol and commas, then convert to float
-                    price_text = ''.join(c for c in price_text if c.isdigit() or c == '.')
-                    price = float(price_text) if price_text else None
+                    # Clean the price text to handle cases with multiple prices
+                    price_text = price_text.replace('$', '').replace(',', '')
+                    # Extract the first valid price if there are multiple
+                    price_match = re.search(r'([0-9]+\.[0-9]+)', price_text)
+                    if price_match:
+                        price = float(price_match.group(1))
                 
                 # If price not found in search results, try to extract from product page
                 if not price:

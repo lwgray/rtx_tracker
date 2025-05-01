@@ -47,13 +47,13 @@ class StockPredictionModel:
         # Train new model
         session = get_session()
         try:
-            # Get stock history
+            # Check if we have enough stock history data
             stock_history = session.query(StockHistory)\
                 .filter(StockHistory.product_id == product_id)\
                 .order_by(StockHistory.timestamp).all()
-            
-            if len(stock_history) < 10:
-                logger.error(f"Insufficient data to train model for product {product_id}")
+                
+            if len(stock_history) < 2:  # Minimum 2 data points needed
+                logger.warning(f"Not enough stock history data for product ID {product_id}")
                 return None
             
             # Prepare data for modeling
@@ -185,13 +185,13 @@ class PricePredictionModel:
         # Train new model
         session = get_session()
         try:
-            # Get price history
+            # Check if we have enough price history data
             price_history = session.query(PriceHistory)\
                 .filter(PriceHistory.product_id == product_id)\
                 .order_by(PriceHistory.timestamp).all()
-            
-            if len(price_history) < 10:
-                logger.error(f"Insufficient data to train model for product {product_id}")
+                
+            if len(price_history) < 2:  # Minimum 2 data points needed
+                logger.warning(f"Not enough price history data for product ID {product_id}")
                 return None
             
             # Prepare data for modeling

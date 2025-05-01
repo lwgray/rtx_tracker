@@ -14,3 +14,5 @@ SQLAlchemy==2.0.20
 plotly==6.0.1
 kaleido==0.2.1
 dash==3.0.4
+selenium==4.15.2
+webdriver-manager==4.0.1
