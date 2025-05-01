@@ -1,0 +1,33 @@
+2025-04-30 19:11:30 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:12:33 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:12:33 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-04-30 19:13:29 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:13:29 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-04-30 19:35:05 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:35:05 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-04-30 19:36:59 - RTX_Tracker - WARNING - Resetting entire database - all data will be lost!
+2025-04-30 19:36:59 - RTX_Tracker - INFO - Database has been completely reset
+2025-04-30 19:37:11 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:37:11 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-04-30 19:43:27 - RTX_Tracker - INFO - Checking if 'upc' column exists in products table
+2025-04-30 19:44:49 - RTX_Tracker - INFO - Checking if 'upc' column exists in products table
+2025-04-30 19:44:49 - RTX_Tracker - INFO - Adding 'upc' column to products table
+2025-04-30 19:44:49 - RTX_Tracker - INFO - Added 'upc' column to products table
+2025-04-30 19:44:57 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-04-30 19:44:57 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 05:53:22 - RTX_Tracker - INFO - Database columns for products: ['id', 'retailer_id', 'name', 'manufacturer', 'url', 'description', 'specifications', 'created_at', 'updated_at', 'upc']
+2025-05-01 05:53:22 - RTX_Tracker - INFO - Model columns for Product: ['id', 'retailer_id', 'name', 'manufacturer', 'upc', 'url', 'description', 'specifications', 'created_at', 'updated_at']
+2025-05-01 05:54:16 - RTX_Tracker - WARNING - Resetting entire database - all data will be lost!
+2025-05-01 05:54:16 - RTX_Tracker - INFO - Database has been completely reset
+2025-05-01 05:55:21 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 05:55:21 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 05:56:45 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 05:56:46 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 06:25:57 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 06:25:58 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 06:31:08 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 06:31:08 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 06:32:05 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 06:32:05 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
+2025-05-01 06:33:41 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 06:33:41 - RTX_Tracker - INFO - Starting both monitoring service and web dashboard
