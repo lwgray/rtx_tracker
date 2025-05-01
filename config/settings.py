@@ -38,7 +38,6 @@ def load_config():
             'BEST_BUY': 'https://www.bestbuy.com/site/nvidia-geforce-rtx-5090-32gb-gddr7-graphics-card-dark-gun-metal/6614151.p?skuId=6614151',
             'NEWEGG': 'https://www.newegg.com/p/pl?d=rtx+5090',
             'AMAZON': 'https://www.amazon.com/s?k=rtx+5090',
-            'NVIDIA': 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/',
             'MICRO_CENTER': 'https://www.microcenter.com/search/search_results.aspx?N=&cat=&Ntt=rtx+5090',
             'BH_PHOTO': 'https://www.bhphotovideo.com/c/search?q=rtx%205090'
         }

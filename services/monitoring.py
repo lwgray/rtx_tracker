@@ -9,7 +9,6 @@ from database.models import Retailer
 from scrapers.best_buy import scrape_best_buy
 from scrapers.newegg import scrape_newegg
 from scrapers.amazon import scrape_amazon
-from scrapers.nvidia import scrape_nvidia
 from scrapers.micro_center import scrape_micro_center
 from scrapers.bh_photo import scrape_bh_photo
 from services.alerts import send_email_alert
@@ -49,13 +48,6 @@ def monitor_rtx_5090():
         for product, price, in_stock in amazon_results:
             if price and in_stock and price < 2500:
                 send_email_alert(product, price, "Amazon")
-        
-        # NVIDIA
-        nvidia = session.query(Retailer).filter_by(name="NVIDIA").first()
-        nvidia_results = scrape_nvidia(session, nvidia)
-        for product, price, in_stock in nvidia_results:
-            if price and in_stock and price < 2500:
-                send_email_alert(product, price, "NVIDIA")
         
         # Micro Center
         micro_center = session.query(Retailer).filter_by(name="Micro Center").first()

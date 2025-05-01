@@ -50,7 +50,6 @@ def init_db():
         "Best Buy": "https://www.bestbuy.com",
         "Newegg": "https://www.newegg.com",
         "Amazon": "https://www.amazon.com",
-        "NVIDIA": "https://www.nvidia.com",
         "Micro Center": "https://www.microcenter.com",
         "B&H Photo": "https://www.bhphotovideo.com"
     }
