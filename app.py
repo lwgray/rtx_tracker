@@ -32,6 +32,10 @@ def create_flask_app():
     app.secret_key = os.urandom(24)
     
     # Set up routes
+    @app.route('/test')
+    def test():
+        return "Flask is working!"
+
     @app.route('/')
     def index():
         session = get_session()
@@ -168,7 +172,7 @@ def run_flask():
     """Start the Flask web application without additional services"""
     logger.info("Starting Flask web interface")
     app = create_flask_app()
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5003))
     app.run(host='0.0.0.0', port=port, debug=True)
 
 # Main entry point
@@ -195,7 +199,7 @@ if __name__ == "__main__":
     parser.add_argument('--export', action='store_true', help='Export data to CSV files')
     parser.add_argument('--days', type=int, default=30, help='Number of days for export or charts')
     parser.add_argument('--ml-models', action='store_true', help='Train machine learning models')
-    
+    parser.add_argument('--port', type=int, default=5003, help='Port number for Flask')
     args = parser.parse_args()
     
     if args.export:
@@ -231,7 +235,7 @@ if __name__ == "__main__":
     elif args.dashboard:
         logger.info("Starting web dashboard")
         app = create_flask_app()
-        port = int(os.environ.get('PORT', 5000))
+        port = int(os.environ.get('PORT', 5003))
         app.run(host='0.0.0.0', port=port)
     elif args.monitor:
         logger.info("Starting monitoring service")
@@ -248,5 +252,5 @@ if __name__ == "__main__":
         
         # Start dashboard in main thread
         app = create_flask_app()
-        port = int(os.environ.get('PORT', 5000))
+        port = args.port if args.port else int(os.environ.get('PORT', 5003))
         app.run(host='0.0.0.0', port=port)

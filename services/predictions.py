@@ -172,8 +172,13 @@ class StockPredictionModel:
             ])
             
             # Make predictions
-            predictions = self.model.predict_proba(future_X)[:, 1]  # Probability of being in stock
-            
+            if hasattr(self.model, 'predict_proba') and self.model.predict_proba(future_X).shape[1] > 1:
+                predictions = self.model.predict_proba(future_X)[:, 1]  # Probability of being in stock
+            else:
+                # Fallback to regular predict if predict_proba doesn't work correctly
+                raw_predictions = self.model.predict(future_X)
+                predictions = [p for p in raw_predictions]  # Use the raw predictions
+                    
             return list(zip(future_dates, predictions))
             
         except Exception as e:
@@ -804,7 +809,7 @@ def recommend_best_time_to_buy(product_id, days_ahead=30):
         if stock_probs:
             fig.update_layout(
                 yaxis2=dict(
-                    title="Stock Probability",
+                    title=dict(text="Stock Probability", font=dict(color='green')),
                     titlefont=dict(color='green'),
                     tickfont=dict(color='green'),
                     overlaying='y',
