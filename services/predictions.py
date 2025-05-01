@@ -47,13 +47,13 @@ class StockPredictionModel:
         # Train new model
         session = get_session()
         try:
-            # Check if we have enough stock history data
+            # Get stock history
             stock_history = session.query(StockHistory)\
                 .filter(StockHistory.product_id == product_id)\
                 .order_by(StockHistory.timestamp).all()
-                
-            if len(stock_history) < 2:  # Minimum 2 data points needed
-                logger.warning(f"Not enough stock history data for product ID {product_id}")
+            
+            if len(stock_history) < 2:  # Reduced from 10 to 2 minimum data points
+                logger.warning(f"Insufficient data to train model for product {product_id}, only {len(stock_history)} data points available")
                 return None
             
             # Prepare data for modeling
@@ -68,26 +68,52 @@ class StockPredictionModel:
             # Add more features if available (like day of week, etc.)
             X = np.column_stack([X, [date.weekday() for date in dates]])
             
-            # Define hyperparameter grid
+            # Define hyperparameter grid - simplified for small datasets
             param_grid = {
-                'n_estimators': [50, 100, 200],
-                'max_depth': [None, 10, 20],
-                'min_samples_split': [2, 5, 10]
+                'n_estimators': [50, 100],
+                'max_depth': [None, 5],
+                'min_samples_split': [2]
             }
             
-            # Train model with hyperparameter tuning
-            grid_search = GridSearchCV(
-                RandomForestClassifier(random_state=42),
-                param_grid=param_grid,
-                cv=min(5, len(X) // 2),  # Use at most 5-fold CV
-                scoring='accuracy'
-            )
-            
-            # Fall back to basic model if not enough data for CV
-            if len(X) < 10:
-                self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+            # For very small datasets, use a simpler model
+            if len(X) < 5:
+                logger.info(f"Using simpler model due to limited data points ({len(X)})")
+                self.model = RandomForestClassifier(n_estimators=50, max_depth=None, random_state=42)
                 self.model.fit(X, y)
+            
+            # For medium datasets, use simple GridSearch
+            elif len(X) < 10: 
+                logger.info(f"Using simplified grid search due to limited data points ({len(X)})")
+                cv_folds = min(3, len(X) // 2)  # Use at most 3-fold CV for smaller datasets
+                
+                if cv_folds < 2:  # If we can't do CV with the data we have
+                    self.model = RandomForestClassifier(n_estimators=50, random_state=42)
+                    self.model.fit(X, y)
+                else:
+                    grid_search = GridSearchCV(
+                        RandomForestClassifier(random_state=42),
+                        param_grid=param_grid,
+                        cv=cv_folds,
+                        scoring='accuracy'
+                    )
+                    grid_search.fit(X, y)
+                    self.model = grid_search.best_estimator_
+                    logger.info(f"Best parameters: {grid_search.best_params_}")
+            
+            # For larger datasets, use the full GridSearch
             else:
+                param_grid = {
+                    'n_estimators': [50, 100, 200],
+                    'max_depth': [None, 10, 20],
+                    'min_samples_split': [2, 5, 10]
+                }
+                
+                grid_search = GridSearchCV(
+                    RandomForestClassifier(random_state=42),
+                    param_grid=param_grid,
+                    cv=min(5, len(X) // 2),  # Use at most 5-fold CV
+                    scoring='accuracy'
+                )
                 grid_search.fit(X, y)
                 self.model = grid_search.best_estimator_
                 logger.info(f"Best parameters: {grid_search.best_params_}")
@@ -185,13 +211,13 @@ class PricePredictionModel:
         # Train new model
         session = get_session()
         try:
-            # Check if we have enough price history data
+            # Get price history
             price_history = session.query(PriceHistory)\
                 .filter(PriceHistory.product_id == product_id)\
                 .order_by(PriceHistory.timestamp).all()
-                
-            if len(price_history) < 2:  # Minimum 2 data points needed
-                logger.warning(f"Not enough price history data for product ID {product_id}")
+            
+            if len(price_history) < 2:  # Reduced from 10 to 2 minimum data points
+                logger.warning(f"Insufficient data to train model for product {product_id}, only {len(price_history)} data points available")
                 return None
             
             # Prepare data for modeling
@@ -206,26 +232,52 @@ class PricePredictionModel:
             # Add more features if available (like day of week, etc.)
             X = np.column_stack([X, [date.weekday() for date in dates]])
             
-            # Define hyperparameter grid
+            # Define hyperparameter grid - simplified for small datasets
             param_grid = {
-                'n_estimators': [50, 100, 200],
-                'max_depth': [None, 10, 20],
-                'min_samples_split': [2, 5, 10]
+                'n_estimators': [50, 100],
+                'max_depth': [None, 5],
+                'min_samples_split': [2]
             }
             
-            # Train model with hyperparameter tuning
-            grid_search = GridSearchCV(
-                RandomForestRegressor(random_state=42),
-                param_grid=param_grid,
-                cv=min(5, len(X) // 2),  # Use at most 5-fold CV
-                scoring='neg_mean_squared_error'
-            )
-            
-            # Fall back to basic model if not enough data for CV
-            if len(X) < 10:
-                self.model = RandomForestRegressor(n_estimators=100, random_state=42)
+            # For very small datasets, use a simpler model
+            if len(X) < 5:
+                logger.info(f"Using simpler model due to limited data points ({len(X)})")
+                self.model = RandomForestRegressor(n_estimators=50, max_depth=None, random_state=42)
                 self.model.fit(X, y)
+            
+            # For medium datasets, use simple GridSearch
+            elif len(X) < 10:
+                logger.info(f"Using simplified grid search due to limited data points ({len(X)})")
+                cv_folds = min(3, len(X) // 2)  # Use at most 3-fold CV for smaller datasets
+                
+                if cv_folds < 2:  # If we can't do CV with the data we have
+                    self.model = RandomForestRegressor(n_estimators=50, random_state=42)
+                    self.model.fit(X, y)
+                else:
+                    grid_search = GridSearchCV(
+                        RandomForestRegressor(random_state=42),
+                        param_grid=param_grid,
+                        cv=cv_folds,
+                        scoring='neg_mean_squared_error'
+                    )
+                    grid_search.fit(X, y)
+                    self.model = grid_search.best_estimator_
+                    logger.info(f"Best parameters: {grid_search.best_params_}")
+            
+            # For larger datasets, use the full GridSearch
             else:
+                param_grid = {
+                    'n_estimators': [50, 100, 200],
+                    'max_depth': [None, 10, 20],
+                    'min_samples_split': [2, 5, 10]
+                }
+                
+                grid_search = GridSearchCV(
+                    RandomForestRegressor(random_state=42),
+                    param_grid=param_grid,
+                    cv=min(5, len(X) // 2),  # Use at most 5-fold CV
+                    scoring='neg_mean_squared_error'
+                )
                 grid_search.fit(X, y)
                 self.model = grid_search.best_estimator_
                 logger.info(f"Best parameters: {grid_search.best_params_}")
@@ -299,9 +351,14 @@ class PricePredictionModel:
             X = np.column_stack([X, [date.weekday() for date in dates]])
             y = prices
             
-            y_pred = self.model.predict(X)
-            mse = np.mean((y - y_pred) ** 2)
-            std_error = np.sqrt(mse)
+            # Calculate standard error more safely
+            try:
+                y_pred = self.model.predict(X)
+                mse = np.mean((y - y_pred) ** 2)
+                std_error = np.sqrt(mse)
+            except Exception as e:
+                logger.warning(f"Error calculating prediction error: {e}. Using default error value.")
+                std_error = (max(y) - min(y)) * 0.1  # Use 10% of range as fallback
             
             return list(zip(future_dates, predictions)), std_error
             
@@ -338,10 +395,29 @@ def predict_price_trend(product_id, days_ahead=7):
         prediction_result = price_model.predict(product_id, days_ahead)
         
         if not prediction_result:
-            logger.error(f"Failed to generate price predictions for product ID {product_id}")
-            return None
+            logger.warning(f"Failed to generate price predictions for product ID {product_id}. Using historical average instead.")
             
-        predictions, std_error = prediction_result
+            # Fallback to simple average if model fails
+            price_history = session.query(PriceHistory)\
+                .filter(PriceHistory.product_id == product_id)\
+                .order_by(PriceHistory.timestamp).all()
+                
+            if not price_history:
+                logger.error("No price history available for fallback prediction")
+                return None
+                
+            # Calculate average price
+            avg_price = sum(ph.price for ph in price_history) / len(price_history)
+            
+            # Generate constant prediction
+            now = datetime.datetime.utcnow()
+            future_dates = [now + datetime.timedelta(days=i) for i in range(1, days_ahead + 1)]
+            predictions = [(date, avg_price) for date in future_dates]
+            std_error = max(ph.price for ph in price_history) - min(ph.price for ph in price_history)
+            
+            logger.info("Using constant prediction as fallback")
+        else:
+            predictions, std_error = prediction_result
         
         # Get price history for chart
         price_history = session.query(PriceHistory)\
@@ -467,9 +543,35 @@ def predict_stock_availability(product_id, days_ahead=7):
         predictions = stock_model.predict(product_id, days_ahead)
         
         if not predictions:
-            logger.error(f"Failed to generate stock predictions for product ID {product_id}")
-            return None
+            logger.warning(f"Failed to generate stock predictions for product ID {product_id}. Using historical trend.")
             
+            # Fallback: use most recent stock status with declining probability
+            stock_history = session.query(StockHistory)\
+                .filter(StockHistory.product_id == product_id)\
+                .order_by(StockHistory.timestamp.desc()).all()
+                
+            if not stock_history:
+                logger.error("No stock history available for fallback prediction")
+                return None
+                
+            # Get most recent stock status
+            latest_stock = stock_history[0]
+            in_stock = latest_stock.in_stock
+            
+            # Generate declining probability if in stock, increasing if out of stock
+            now = datetime.datetime.utcnow()
+            future_dates = [now + datetime.timedelta(days=i) for i in range(1, days_ahead + 1)]
+            
+            if in_stock:
+                # Start with high probability that declines over time
+                probs = [max(0.5, 1.0 - (i * 0.05)) for i in range(days_ahead)]
+            else:
+                # Start with low probability that increases over time
+                probs = [min(0.5, 0.0 + (i * 0.05)) for i in range(days_ahead)]
+                
+            predictions = list(zip(future_dates, probs))
+            logger.info("Using trend-based fallback for stock prediction")
+        
         # Get stock history for chart
         stock_history = session.query(StockHistory)\
             .filter(StockHistory.product_id == product_id)\

@@ -85,100 +85,71 @@ def create_flask_app():
     @app.route('/product/<int:product_id>')
     def product_detail(product_id):
         session = get_session()
-        # Update SQLAlchemy usage to avoid deprecation warning and properly load relationships
-        from sqlalchemy.orm import joinedload
         
-        # Using session.get() with options to eager load the retailer relationship
-        product = session.get(
-            Product, 
-            product_id,
-            options=[joinedload(Product.retailer)]
-        )
-        
-        if not product:
-            return render_template('404.html')
-        
-        # Get latest price and stock status
-        latest_price = session.query(PriceHistory)\
-            .filter(PriceHistory.product_id == product_id)\
-            .order_by(PriceHistory.timestamp.desc())\
-            .first()
-        
-        latest_stock = session.query(StockHistory)\
-            .filter(StockHistory.product_id == product_id)\
-            .order_by(StockHistory.timestamp.desc())\
-            .first()
-        
-        # Check data counts for charts and predictions
-        price_count = session.query(PriceHistory)\
-            .filter(PriceHistory.product_id == product_id)\
-            .count()
-            
-        stock_count = session.query(StockHistory)\
-            .filter(StockHistory.product_id == product_id)\
-            .count()
-        
-        # Initialize variables
-        price_chart = None
-        stock_chart = None
-        prediction_chart = None
-        predictions = None
-        stock_prediction_chart = None
-        stock_predictions = None
-        recommendation = None
-        
-        # Generate basic history charts if enough data
         try:
-            if price_count >= 2:
-                price_chart = generate_price_history_chart(product_id)
+            # Use session.get() with options to eager load the relationship
+            from sqlalchemy.orm import selectinload
+            from sqlalchemy import select
             
-            if stock_count >= 2:
-                stock_chart = generate_stock_history_chart(product_id)
+            # Create a select statement with eager loading of the retailer relationship
+            stmt = select(Product).where(Product.id == product_id).options(selectinload(Product.retailer))
+            product = session.execute(stmt).scalar_one_or_none()
+            
+            if not product:
+                return render_template('404.html')
+            
+            # Get latest price and stock status
+            latest_price = session.query(PriceHistory)\
+                .filter(PriceHistory.product_id == product_id)\
+                .order_by(PriceHistory.timestamp.desc())\
+                .first()
+            
+            latest_stock = session.query(StockHistory)\
+                .filter(StockHistory.product_id == product_id)\
+                .order_by(StockHistory.timestamp.desc())\
+                .first()
+            
+            # Generate charts
+            price_chart = generate_price_history_chart(product_id)
+            stock_chart = generate_stock_history_chart(product_id)
+            
+            # Generate predictions
+            prediction_result = predict_price_trend(product_id)
+            stock_prediction_result = predict_stock_availability(product_id)
+            recommendation = recommend_best_time_to_buy(product_id)
+            
+            prediction_chart = None
+            predictions = None
+            stock_prediction_chart = None
+            stock_predictions = None
+            
+            if prediction_result:
+                prediction_chart, predictions = prediction_result
+            
+            if stock_prediction_result:
+                stock_prediction_chart, stock_predictions = stock_prediction_result
+            
+            current_year = datetime.datetime.now().year
+            
+            return render_template(
+                'product_detail.html',
+                product=product,
+                current_price=latest_price.price if latest_price else None,
+                in_stock=latest_stock.in_stock if latest_stock else False,
+                price_chart=price_chart,
+                stock_chart=stock_chart,
+                prediction_chart=prediction_chart,
+                stock_prediction_chart=stock_prediction_chart,
+                predictions=predictions,
+                stock_predictions=stock_predictions,
+                recommendation=recommendation,
+                current_year=current_year
+            )
         except Exception as e:
-            logger.error(f"Error generating history charts: {e}")
-        
-        # Generate predictions if there's enough data
-        try:
-            if price_count >= 2:  # Minimum needed for prediction
-                # Generate price predictions
-                prediction_result = predict_price_trend(product_id)
-                if prediction_result:
-                    prediction_chart, predictions = prediction_result
-                
-                # Generate stock predictions
-                if stock_count >= 2:
-                    stock_prediction_result = predict_stock_availability(product_id)
-                    if stock_prediction_result:
-                        stock_prediction_chart, stock_predictions = stock_prediction_result
-                
-                # Generate buy recommendation if both predictions are available
-                if predictions and stock_predictions:
-                    recommendation = recommend_best_time_to_buy(product_id)
-            else:
-                logger.info(f"Skipping predictions for product {product_id} - insufficient price history ({price_count} records)")
-                
-        except Exception as e:
-            logger.error(f"Error generating predictions: {e}")
-            # Continue with the page even if predictions fail
-        
-        current_year = datetime.datetime.now().year
-        
-        session.close()
-        
-        return render_template(
-            'product_detail.html',
-            product=product,
-            current_price=latest_price.price if latest_price else None,
-            in_stock=latest_stock.in_stock if latest_stock else False,
-            price_chart=price_chart,
-            stock_chart=stock_chart,
-            prediction_chart=prediction_chart,
-            stock_prediction_chart=stock_prediction_chart,
-            predictions=predictions,
-            stock_predictions=stock_predictions,
-            recommendation=recommendation,
-            current_year=current_year
-        )
+            logger.error(f"Error displaying product details: {e}")
+            return render_template('500.html')
+        finally:
+            session.close()
     
     # Error handling
     @app.errorhandler(404)
@@ -197,7 +168,7 @@ def run_flask():
     """Start the Flask web application without additional services"""
     logger.info("Starting Flask web interface")
     app = create_flask_app()
-    port = int(os.environ.get('FLASK_PORT', 5000))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
 
 # Main entry point
@@ -260,7 +231,7 @@ if __name__ == "__main__":
     elif args.dashboard:
         logger.info("Starting web dashboard")
         app = create_flask_app()
-        port = int(os.environ.get('FLASK_PORT', 5000))
+        port = int(os.environ.get('PORT', 5000))
         app.run(host='0.0.0.0', port=port)
     elif args.monitor:
         logger.info("Starting monitoring service")
@@ -277,5 +248,5 @@ if __name__ == "__main__":
         
         # Start dashboard in main thread
         app = create_flask_app()
-        port = int(os.environ.get('FLASK_PORT', 5000))
+        port = int(os.environ.get('PORT', 5000))
         app.run(host='0.0.0.0', port=port)
