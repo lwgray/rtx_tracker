@@ -141,19 +141,10 @@
                         <h2>Price History</h2>
                     </div>
                     <div class="card-body">
-                        {% if price_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + price_chart) }}" alt="Price History Chart" class="img-fluid" style="width: 100%;" 
+                            <img src="{{ url_for('charts.price_history_chart', product_id=product.id) }}" alt="Price History Chart" class="img-fluid" style="width: 100%;" 
                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load price history chart. Please try refreshing the page.</div>'">
                         </div>
-                        {% else %}
-                        <div class="fallback-message">
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <p>Not enough price history data available yet to generate a chart. Check back after more data is collected.</p>
-                            </div>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -166,19 +157,10 @@
                         <h2>Stock History</h2>
                     </div>
                     <div class="card-body">
-                        {% if stock_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + stock_chart) }}" alt="Stock History Chart" class="img-fluid"
+                            <img src="{{ url_for('charts.stock_history_chart', product_id=product.id) }}" alt="Stock History Chart" class="img-fluid"
                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load stock history chart. Please try refreshing the page.</div>'">
                         </div>
-                        {% else %}
-                        <div class="fallback-message">
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <p>Not enough stock history data available to generate a chart. Check back after more data is collected.</p>
-                            </div>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -191,9 +173,8 @@
                         <h2>Price Prediction</h2>
                     </div>
                     <div class="card-body">
-                        {% if prediction_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + prediction_chart) }}" alt="Price Prediction Chart" class="img-fluid"
+                            <img src="{{ url_for('charts.price_prediction_chart', product_id=product.id) }}" alt="Price Prediction Chart" class="img-fluid"
                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load price prediction chart. Please try refreshing the page.</div>'">
                         </div>
                         
@@ -205,20 +186,11 @@
                                     <th>Predicted Price</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for date, price in predictions %}
-                                <tr>
-                                    <td>{{ date.strftime('%Y-%m-%d') }}</td>
-                                    <td>${{ '%.2f'|format(price) }}</td>
-                                </tr>
-                                {% endfor %}
+                            <tbody id="price-predictions">
+                                <!-- Predictions will be loaded dynamically -->
+                                <tr><td colspan="2">Loading predictions...</td></tr>
                             </tbody>
                         </table>
-                        {% else %}
-                        <div class="fallback-message">
-                            <p>Not enough data available to generate price predictions.</p>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -229,9 +201,8 @@
                         <h2>Stock Prediction</h2>
                     </div>
                     <div class="card-body">
-                        {% if stock_prediction_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + stock_prediction_chart) }}" alt="Stock Prediction Chart" class="img-fluid"
+                            <img src="{{ url_for('charts.stock_prediction_chart', product_id=product.id) }}" alt="Stock Prediction Chart" class="img-fluid"
                                  onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load stock prediction chart. Please try refreshing the page.</div>'">
                         </div>
                         
@@ -243,20 +214,11 @@
                                     <th>In Stock Probability</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for date, probability in stock_predictions %}
-                                <tr>
-                                    <td>{{ date.strftime('%Y-%m-%d') }}</td>
-                                    <td>{{ '%.1f'|format(probability * 100) }}%</td>
-                                </tr>
-                                {% endfor %}
+                            <tbody id="stock-predictions">
+                                <!-- Predictions will be loaded dynamically -->
+                                <tr><td colspan="2">Loading predictions...</td></tr>
                             </tbody>
                         </table>
-                        {% else %}
-                        <div class="fallback-message">
-                            <p>Not enough data available to generate stock predictions.</p>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -292,6 +254,56 @@
                     }
                 }
             }, true);
+            
+            // Load price predictions
+            fetch('/api/price_predictions/{{ product.id }}')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('price-predictions');
+                    if (data.error) {
+                        tbody.innerHTML = `<tr><td colspan="2" class="text-center">Not enough data available.</td></tr>`;
+                        return;
+                    }
+                    
+                    let rows = '';
+                    data.predictions.forEach(pred => {
+                        rows += `<tr>
+                            <td>${pred.date}</td>
+                            <td>$${pred.price}</td>
+                        </tr>`;
+                    });
+                    tbody.innerHTML = rows;
+                })
+                .catch(error => {
+                    console.error('Error fetching price predictions:', error);
+                    document.getElementById('price-predictions').innerHTML = 
+                        `<tr><td colspan="2" class="text-center">Error loading predictions.</td></tr>`;
+                });
+                
+            // Load stock predictions
+            fetch('/api/stock_predictions/{{ product.id }}')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('stock-predictions');
+                    if (data.error) {
+                        tbody.innerHTML = `<tr><td colspan="2" class="text-center">Not enough data available.</td></tr>`;
+                        return;
+                    }
+                    
+                    let rows = '';
+                    data.predictions.forEach(pred => {
+                        rows += `<tr>
+                            <td>${pred.date}</td>
+                            <td>${pred.probability}%</td>
+                        </tr>`;
+                    });
+                    tbody.innerHTML = rows;
+                })
+                .catch(error => {
+                    console.error('Error fetching stock predictions:', error);
+                    document.getElementById('stock-predictions').innerHTML = 
+                        `<tr><td colspan="2" class="text-center">Error loading predictions.</td></tr>`;
+                });
         });
     </script>
 </body>

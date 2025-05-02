@@ -39,10 +39,19 @@ def setup_webdriver():
     return driver
 
 def save_debug_content(url, content, filename_prefix="amazon_debug"):
-    """Save HTML content for debugging"""
+    """
+    Save HTML content for debugging
+    
+    This function is controlled by the DEBUG_SCRAPER environment variable.
+    Set DEBUG_SCRAPER=True to enable saving debug HTML files.
+    """
+    # Skip debug saving if not enabled (default is disabled)
+    if os.environ.get('DEBUG_SCRAPER', '').lower() != 'true':
+        return None
+        
     try:
-        # Create debug directory if it doesn't exist
-        debug_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs", "debug")
+        # Use a temp directory for debug files instead of logs/debug
+        debug_dir = os.path.join("/tmp", "rtx_tracker_debug")
         os.makedirs(debug_dir, exist_ok=True)
         
         # Create a sanitized filename from the URL
