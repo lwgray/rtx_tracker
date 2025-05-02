@@ -1,13 +1,17 @@
 """
-Dynamic chart generation routes for RTX 5090 Stock Tracker
+Fixed chart generation routes for RTX 5090 Stock Tracker
+This version provides both PNG rendering and HTML fallback
 """
 
 import io
-from flask import Blueprint, send_file, jsonify, make_response
+import os
+import base64
+from flask import Blueprint, send_file, jsonify, make_response, Response
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
 import pandas as pd
+import numpy as np
 import datetime
 from sqlalchemy import func
 from database.db import get_session
@@ -21,6 +25,14 @@ logger = get_logger(__name__)
 # Create blueprint
 chart_bp = Blueprint('charts', __name__)
 
+# Set kaleido as the renderer if available
+try:
+    import kaleido
+    HAS_KALEIDO = True
+except ImportError:
+    HAS_KALEIDO = False
+    logger.warning("Kaleido not available. Falling back to HTML charts.")
+
 @chart_bp.route('/charts/price_history/<int:product_id>')
 def price_history_chart(product_id):
     """Generate price history chart for a product"""
@@ -29,15 +41,7 @@ def price_history_chart(product_id):
         if fig is None:
             return make_response(jsonify({"error": "Not enough data"}), 404)
         
-        # Convert the figure to a PNG image
-        img_bytes = fig.to_image(format="png")
-        
-        # Create a file-like object from the bytes
-        img_io = io.BytesIO(img_bytes)
-        img_io.seek(0)
-        
-        # Send the file with the appropriate MIME type
-        return send_file(img_io, mimetype='image/png')
+        return serve_figure(fig, f"price_history_{product_id}")
     
     except Exception as e:
         logger.error(f"Error generating price history chart: {e}")
@@ -51,15 +55,7 @@ def stock_history_chart(product_id):
         if fig is None:
             return make_response(jsonify({"error": "Not enough data"}), 404)
         
-        # Convert the figure to a PNG image
-        img_bytes = fig.to_image(format="png")
-        
-        # Create a file-like object from the bytes
-        img_io = io.BytesIO(img_bytes)
-        img_io.seek(0)
-        
-        # Send the file with the appropriate MIME type
-        return send_file(img_io, mimetype='image/png')
+        return serve_figure(fig, f"stock_history_{product_id}")
     
     except Exception as e:
         logger.error(f"Error generating stock history chart: {e}")
@@ -73,15 +69,7 @@ def price_prediction_chart(product_id):
         if fig is None:
             return make_response(jsonify({"error": "Not enough data"}), 404)
         
-        # Convert the figure to a PNG image
-        img_bytes = fig.to_image(format="png")
-        
-        # Create a file-like object from the bytes
-        img_io = io.BytesIO(img_bytes)
-        img_io.seek(0)
-        
-        # Send the file with the appropriate MIME type
-        return send_file(img_io, mimetype='image/png')
+        return serve_figure(fig, f"price_prediction_{product_id}")
     
     except Exception as e:
         logger.error(f"Error generating price prediction chart: {e}")
@@ -95,15 +83,7 @@ def stock_prediction_chart(product_id):
         if fig is None:
             return make_response(jsonify({"error": "Not enough data"}), 404)
         
-        # Convert the figure to a PNG image
-        img_bytes = fig.to_image(format="png")
-        
-        # Create a file-like object from the bytes
-        img_io = io.BytesIO(img_bytes)
-        img_io.seek(0)
-        
-        # Send the file with the appropriate MIME type
-        return send_file(img_io, mimetype='image/png')
+        return serve_figure(fig, f"stock_prediction_{product_id}")
     
     except Exception as e:
         logger.error(f"Error generating stock prediction chart: {e}")
@@ -117,19 +97,30 @@ def buy_recommendation_chart(product_id):
         if fig is None:
             return make_response(jsonify({"error": "Not enough data"}), 404)
         
-        # Convert the figure to a PNG image
-        img_bytes = fig.to_image(format="png")
-        
-        # Create a file-like object from the bytes
-        img_io = io.BytesIO(img_bytes)
-        img_io.seek(0)
-        
-        # Send the file with the appropriate MIME type
-        return send_file(img_io, mimetype='image/png')
+        return serve_figure(fig, f"buy_recommendation_{product_id}")
     
     except Exception as e:
         logger.error(f"Error generating buy recommendation chart: {e}")
         return make_response(jsonify({"error": str(e)}), 500)
+
+def serve_figure(fig, name):
+    """Serve the figure as PNG if kaleido is available, or as HTML otherwise"""
+    try:
+        if HAS_KALEIDO:
+            # Try to render with kaleido
+            img_bytes = fig.to_image(format="png")
+            img_io = io.BytesIO(img_bytes)
+            img_io.seek(0)
+            return send_file(img_io, mimetype='image/png')
+        else:
+            # Fall back to HTML
+            html = fig.to_html(include_plotlyjs='cdn', full_html=False)
+            return Response(html, mimetype='text/html')
+    except Exception as e:
+        logger.error(f"Error rendering figure: {e}")
+        # Fall back to HTML if rendering fails
+        html = fig.to_html(include_plotlyjs='cdn', full_html=False)
+        return Response(html, mimetype='text/html')
 
 def generate_price_history_chart(product_id, days=30):
     """
