@@ -9,6 +9,7 @@
     "postdeploy": "python reset_database.py"
   },
   "env": {
+    "REQUIREMENTS_FILE": "requirements-production.txt",
     "SECRET_KEY": {
       "description": "A secret key for verifying the integrity of signed cookies",
       "generator": "secret"
@@ -78,6 +79,9 @@
     "heroku-postgresql"
   ],
   "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-chrome-for-testing"
+    },
     {
       "url": "heroku/python"
     }
