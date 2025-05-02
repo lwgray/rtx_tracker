@@ -1,3 +1,19 @@
+# System files
 **/.DS_Store
 .env
 **/__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# Generated files
+*.log
+logs/debug/
+logs/*.log
+static/img/*.png
+static/img/*.html
+models/*.joblib
+
+# Runtime files
+monitoring_state.json
+*.db

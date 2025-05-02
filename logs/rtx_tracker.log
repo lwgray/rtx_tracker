@@ -470,3 +470,7 @@
 2025-05-01 21:13:18 - RTX_Tracker - INFO - Starting Flask web interface
 2025-05-01 21:19:38 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
 2025-05-01 21:19:38 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 21:23:26 - RTX_Tracker - INFO - Starting cleanup of debug HTML files
+2025-05-01 21:23:26 - RTX_Tracker - INFO - Removed 59 HTML files from static/img directory
+2025-05-01 21:23:26 - RTX_Tracker - INFO - Removed 133 HTML files from logs/debug directory
+2025-05-01 21:23:26 - RTX_Tracker - INFO - Cleanup complete. Removed 192 HTML files in total
