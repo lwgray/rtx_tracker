@@ -44,7 +44,7 @@ heroku config:set DEBUG=False
 The application uses Selenium for web scraping. Heroku requires a special buildpack to run Chrome in headless mode:
 
 ```bash
-heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome
+heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chrome-for-testing
 heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chromedriver
 ```
 

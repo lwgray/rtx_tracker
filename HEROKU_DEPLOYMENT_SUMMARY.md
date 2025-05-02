@@ -52,7 +52,7 @@ The application requires the following environment variables on Heroku:
 3. Configure environment variables as described in HEROKU_SETUP.md
 4. Add Chrome buildpacks:
    ```
-   heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome
+   heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chrome-for-testing
    heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chromedriver
    ```
 5. Deploy: `git push heroku main`
