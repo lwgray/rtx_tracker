@@ -66,6 +66,21 @@ Edit the `.env` file to configure:
 - Alert thresholds
 - Monitoring intervals
 
+## Setting Up S3 for Image Storage (Optional)
+
+To prevent local storage of chart images, you can use Amazon S3:
+
+1. Create an S3 bucket in your AWS account
+2. Add the following environment variables to your `.env` file:
+```
+S3_BUCKET_NAME=your-bucket-name
+AWS_REGION=your-region (default: us-east-1)
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+```
+
+When S3 is properly configured, all charts and images will be stored in your S3 bucket instead of locally in the `static/img` directory. The application also includes an automatic cleanup service that removes old chart files periodically (older than 7 days).
+
 ## Deployment
 
 The application is configured for deployment on Heroku. To deploy:

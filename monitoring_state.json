@@ -1,0 +1,7 @@
+{
+  "monitoring_active": true,
+  "interval_minutes": 60,
+  "price_threshold": 2500,
+  "last_run": "2025-05-01T20:54:51.085707",
+  "next_run": "2025-05-01T21:54:51.085707"
+}

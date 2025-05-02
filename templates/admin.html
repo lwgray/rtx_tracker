@@ -1,0 +1,226 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTX 5090 Tracker - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .settings-card {
+            border-left: 4px solid #007bff;
+        }
+        .status-card {
+            border-left: 4px solid #28a745;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-active {
+            background-color: #28a745;
+        }
+        .status-inactive {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">RTX 5090 Stock Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/export_data">Export Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin">Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1 class="mb-4">Admin Dashboard</h1>
+        
+        {% if message %}
+        <div class="alert alert-{{ message_type }}">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Monitoring Settings Card -->
+            <div class="col-md-6">
+                <div class="card settings-card mb-4">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cogs"></i> Monitoring Settings</h2>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/settings" method="POST">
+                            <div class="mb-3">
+                                <label for="monitoring_interval" class="form-label">Monitoring Interval (minutes)</label>
+                                <input type="number" class="form-control" id="monitoring_interval" name="monitoring_interval" value="{{ current_interval }}" min="5" max="1440" required>
+                                <small class="text-muted">Minimum: 5 minutes, Maximum: 24 hours (1440 minutes)</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="price_threshold" class="form-label">Price Alert Threshold ($)</label>
+                                <input type="number" class="form-control" id="price_threshold" name="price_threshold" value="{{ price_threshold }}" min="0" step="0.01" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Card -->
+            <div class="col-md-6">
+                <div class="card status-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> System Status</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h4>
+                                <span class="status-indicator {{ 'status-active' if monitoring_active else 'status-inactive' }}"></span>
+                                Monitoring Service: {{ 'Active' if monitoring_active else 'Inactive' }}
+                            </h4>
+                            <p>Last run: {{ last_run_time }}</p>
+                            <p>Next scheduled run: {{ next_run_time }}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h4>Statistics</h4>
+                            <p>Products tracked: {{ products_count }}</p>
+                            <p>Price records: {{ price_records_count }}</p>
+                            <p>Stock records: {{ stock_records_count }}</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="runNowBtn" class="btn btn-success">Run Monitoring Now</button>
+                            <button id="toggleMonitoringBtn" class="btn {{ 'btn-danger' if monitoring_active else 'btn-primary' }}">
+                                {{ 'Pause Monitoring' if monitoring_active else 'Resume Monitoring' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Retailer Settings Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2><i class="fas fa-store"></i> Retailer Settings</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Retailer</th>
+                                <th>Website</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for retailer in retailers %}
+                            <tr>
+                                <td>{{ retailer.name }}</td>
+                                <td><a href="{{ retailer.website }}" target="_blank">{{ retailer.website }}</a></td>
+                                <td>
+                                    <span class="badge {{ 'bg-success' if retailer.active else 'bg-danger' }}">
+                                        {{ 'Active' if retailer.active else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="/admin/toggle_retailer" method="POST" class="d-inline">
+                                        <input type="hidden" name="retailer_id" value="{{ retailer.id }}">
+                                        <button type="submit" class="btn btn-sm {{ 'btn-danger' if retailer.active else 'btn-success' }}">
+                                            {{ 'Disable' if retailer.active else 'Enable' }}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>RTX 5090 Stock Tracker &copy; {{ current_year }}</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Run monitoring now button
+        document.getElementById('runNowBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to run monitoring now?')) {
+                fetch('/admin/run_now', {method: 'POST'})
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Monitoring started successfully!');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 500);
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    });
+            }
+        });
+        
+        // Toggle monitoring button
+        document.getElementById('toggleMonitoringBtn').addEventListener('click', function() {
+            const currentStatus = {{ 'true' if monitoring_active else 'false' }};
+            const action = currentStatus ? 'pause' : 'resume';
+            
+            if (confirm(`Are you sure you want to ${action} monitoring?`)) {
+                fetch('/admin/toggle_monitoring', {method: 'POST'})
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

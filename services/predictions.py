@@ -502,18 +502,40 @@ def predict_price_trend(product_id, days_ahead=7):
         static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'img')
         os.makedirs(static_dir, exist_ok=True)
         
-        # Save the plot as a PNG file
-        filename = f"price_prediction_{product_id}_{int(time.time())}.png"
+        # Generate filenames with timestamp
+        timestamp = int(time.time())
+        filename = f"price_prediction_{product_id}_{timestamp}.png"
+        html_filename = f"price_prediction_{product_id}_{timestamp}.html"
+        
+        # Check if S3 storage is available
+        from utils.s3_storage import s3_storage
+        
+        if s3_storage.is_enabled():
+            try:
+                # Upload directly to S3
+                png_url = s3_storage.upload_plotly_figure(fig, filename, format='png')
+                html_url = s3_storage.upload_plotly_figure(fig, html_filename, format='html')
+                
+                logger.info(f"Price prediction charts uploaded to S3 for product ID {product_id}")
+                return png_url, predictions  # Return the URL of the PNG file
+            except Exception as e:
+                logger.error(f"Error uploading prediction charts to S3: {e}")
+                # Fall back to local storage
+        
+        # Local storage fallback
         filepath = os.path.join(static_dir, filename)
-        fig.write_image(filepath)
-        
-        # Generate an HTML version for interactive viewing
-        html_filename = f"price_prediction_{product_id}_{int(time.time())}.html"
         html_filepath = os.path.join(static_dir, html_filename)
-        fig.write_html(html_filepath)
         
-        logger.info(f"Price prediction generated for product ID {product_id} and saved as {filename}")
-        return filename, predictions
+        try:
+            # Save both formats locally
+            fig.write_image(filepath)
+            fig.write_html(html_filepath)
+            
+            logger.info(f"Price prediction generated for product ID {product_id} and saved locally")
+            return f"static/img/{filename}", predictions  # Return relative path
+        except Exception as e:
+            logger.error(f"Error saving prediction chart files: {e}")
+            return None
     
     except Exception as e:
         logger.error(f"Error predicting price trend: {e}")
@@ -669,18 +691,40 @@ def predict_stock_availability(product_id, days_ahead=7):
         static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'img')
         os.makedirs(static_dir, exist_ok=True)
         
-        # Save the plot as a PNG file
-        filename = f"stock_prediction_{product_id}_{int(time.time())}.png"
+        # Generate filenames with timestamp
+        timestamp = int(time.time())
+        filename = f"stock_prediction_{product_id}_{timestamp}.png"
+        html_filename = f"stock_prediction_{product_id}_{timestamp}.html"
+        
+        # Check if S3 storage is available
+        from utils.s3_storage import s3_storage
+        
+        if s3_storage.is_enabled():
+            try:
+                # Upload directly to S3
+                png_url = s3_storage.upload_plotly_figure(fig, filename, format='png')
+                html_url = s3_storage.upload_plotly_figure(fig, html_filename, format='html')
+                
+                logger.info(f"Stock prediction charts uploaded to S3 for product ID {product_id}")
+                return png_url, predictions  # Return the URL of the PNG file
+            except Exception as e:
+                logger.error(f"Error uploading stock prediction charts to S3: {e}")
+                # Fall back to local storage
+        
+        # Local storage fallback
         filepath = os.path.join(static_dir, filename)
-        fig.write_image(filepath)
-        
-        # Generate an HTML version for interactive viewing
-        html_filename = f"stock_prediction_{product_id}_{int(time.time())}.html"
         html_filepath = os.path.join(static_dir, html_filename)
-        fig.write_html(html_filepath)
         
-        logger.info(f"Stock prediction generated for product ID {product_id} and saved as {filename}")
-        return filename, predictions
+        try:
+            # Save both formats locally
+            fig.write_image(filepath)
+            fig.write_html(html_filepath)
+            
+            logger.info(f"Stock prediction generated for product ID {product_id} and saved locally")
+            return f"static/img/{filename}", predictions  # Return relative path
+        except Exception as e:
+            logger.error(f"Error saving stock prediction chart files: {e}")
+            return None
     
     except Exception as e:
         logger.error(f"Error predicting stock availability: {e}")
@@ -826,19 +870,44 @@ def recommend_best_time_to_buy(product_id, days_ahead=30):
         static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'img')
         os.makedirs(static_dir, exist_ok=True)
         
-        # Save the recommendation chart
-        filename = f"buy_recommendation_{product_id}_{int(time.time())}.png"
-        filepath = os.path.join(static_dir, filename)
-        fig.write_image(filepath)
+        # Generate filenames with timestamp
+        timestamp = int(time.time())
+        filename = f"buy_recommendation_{product_id}_{timestamp}.png"
+        html_filename = f"buy_recommendation_{product_id}_{timestamp}.html"
         
-        # Generate an HTML version for interactive viewing
-        html_filename = f"buy_recommendation_{product_id}_{int(time.time())}.html"
-        html_filepath = os.path.join(static_dir, html_filename)
-        fig.write_html(html_filepath)
+        # Check if S3 storage is available
+        from utils.s3_storage import s3_storage
         
-        # Add the chart to the recommendation
-        recommendation['chart_filename'] = filename
-        recommendation['html_chart_filename'] = html_filename
+        if s3_storage.is_enabled():
+            try:
+                # Upload directly to S3
+                png_url = s3_storage.upload_plotly_figure(fig, filename, format='png')
+                html_url = s3_storage.upload_plotly_figure(fig, html_filename, format='html')
+                
+                # Add the chart URLs to the recommendation
+                recommendation['chart_filename'] = png_url
+                recommendation['html_chart_filename'] = html_url
+                logger.info(f"Buy recommendation charts uploaded to S3 for product ID {product_id}")
+            except Exception as e:
+                logger.error(f"Error uploading recommendation charts to S3: {e}")
+                # Fall back to local storage
+        else:
+            # Local storage fallback
+            filepath = os.path.join(static_dir, filename)
+            html_filepath = os.path.join(static_dir, html_filename)
+            
+            try:
+                # Save both formats locally
+                fig.write_image(filepath)
+                fig.write_html(html_filepath)
+                
+                # Add the chart filenames to the recommendation (relative paths)
+                recommendation['chart_filename'] = f"static/img/{filename}"
+                recommendation['html_chart_filename'] = f"static/img/{html_filename}"
+                logger.info(f"Buy recommendation charts saved locally for product ID {product_id}")
+            except Exception as e:
+                logger.error(f"Error saving recommendation chart files: {e}")
+                # Continue without charts if saving fails
         
         logger.info(f"Best time to buy recommendation for product ID {product_id}: {min_price_date.strftime('%Y-%m-%d')}")
         return recommendation

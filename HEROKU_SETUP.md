@@ -2,6 +2,8 @@
 
 This guide provides instructions for deploying the RTX 5090 Stock Tracker application to Heroku.
 
+> **S3 Storage Recommendation**: For production deployment, it's highly recommended to set up an S3 bucket for storing chart images to avoid filling up your Heroku dyno's ephemeral storage. See the README.md for S3 configuration instructions.
+
 ## Prerequisites
 
 1. A Heroku account
@@ -37,6 +39,12 @@ heroku config:set TO_EMAIL=your-email@gmail.com
 heroku config:set ALERT_PRICE_THRESHOLD=2500
 heroku config:set MONITORING_INTERVAL=60
 heroku config:set DEBUG=False
+
+# Optional: Set S3 configuration (highly recommended for production)
+heroku config:set S3_BUCKET_NAME=your-bucket-name
+heroku config:set AWS_REGION=us-east-1
+heroku config:set AWS_ACCESS_KEY_ID=your-access-key
+heroku config:set AWS_SECRET_ACCESS_KEY=your-secret-key
 ```
 
 ### 3. Add Selenium buildpack for Heroku

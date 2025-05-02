@@ -35,6 +35,10 @@ def create_flask_app():
     static_img_dir = os.path.join(os.path.dirname(__file__), 'static', 'img')
     os.makedirs(static_img_dir, exist_ok=True)
     
+    # Register admin blueprint for JSON APIs
+    from web.admin_routes import admin_bp
+    app.register_blueprint(admin_bp)
+    
     # Set up routes
     @app.route('/test')
     def test():
@@ -77,7 +81,13 @@ def create_flask_app():
         # Get current year for the copyright notice
         current_year = datetime.datetime.now().year
         
-        return render_template('index.html', retailers=retailers, products=products_data, current_year=current_year)
+        # Load monitoring state for alert price threshold
+        from database.monitoring_state import load_monitoring_state
+        state = load_monitoring_state()
+        price_threshold = state.get('price_threshold', 2500)
+        
+        return render_template('index.html', retailers=retailers, products=products_data, 
+                               current_year=current_year, price_threshold=price_threshold)
     
     @app.route('/export_data')
     def export_data():
@@ -272,6 +282,11 @@ if __name__ == "__main__":
         logger.info("Starting Dash analytics dashboard")
         # Import and run the Dash app directly
         from web.dashboard import app as dash_app
+        
+        # Schedule file cleanup
+        from utils.cleanup import schedule_cleanup
+        schedule_cleanup()
+        
         dash_app.run(debug=True, host='0.0.0.0', port=8050)
     elif args.flask:
         # New option to run only the Flask interface
@@ -288,6 +303,10 @@ if __name__ == "__main__":
     else:
         # If no args specified, start both monitoring and dashboard
         logger.info("Starting both monitoring service and web dashboard")
+        
+        # Schedule file cleanup
+        from utils.cleanup import schedule_cleanup
+        schedule_cleanup()
         
         # Start monitoring in a separate thread
         monitor_thread = threading.Thread(target=setup_scheduled_monitoring)

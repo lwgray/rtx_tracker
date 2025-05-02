@@ -16,10 +16,11 @@ class Retailer(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     website = Column(String(255), nullable=False)
+    active = Column(Boolean, default=True)  # Whether this retailer should be scraped
     products = relationship("Product", back_populates="retailer")
     
     def __repr__(self):
-        return f"<Retailer(name='{self.name}', website='{self.website}')>"
+        return f"<Retailer(name='{self.name}', website='{self.website}', active={self.active})>"
 
 class Product(Base):
     """Product model representing RTX 5090 GPUs from different manufacturers"""

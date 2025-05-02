@@ -131,35 +131,44 @@ def generate_price_history_chart(product_id, days=30):
         static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'img')
         os.makedirs(static_dir, exist_ok=True)
         
-        # Save the plot as a PNG file
-        filename = f"price_history_{product_id}_{int(time.time())}.png"
-        filepath = os.path.join(static_dir, filename)
-        fig.write_image(filepath)
-        
-        # Generate an HTML version for interactive viewing
+        # Generate filenames with timestamp
         timestamp = int(time.time())
+        filename = f"price_history_{product_id}_{timestamp}.png"
         html_filename = f"price_history_{product_id}_{timestamp}.html"
+        
+        # Check if S3 storage is available
+        from utils.s3_storage import s3_storage
+        
+        if s3_storage.is_enabled():
+            try:
+                # Upload directly to S3
+                png_url = s3_storage.upload_plotly_figure(fig, filename, format='png')
+                html_url = s3_storage.upload_plotly_figure(fig, html_filename, format='html')
+                
+                logger.info(f"Price history charts uploaded to S3 for {product.name}")
+                return png_url  # Return the URL of the PNG file
+            except Exception as e:
+                logger.error(f"Error uploading charts to S3: {e}")
+                # Fall back to local storage
+        
+        # Local storage fallback
+        filepath = os.path.join(static_dir, filename)
         html_filepath = os.path.join(static_dir, html_filename)
         
-        # Ensure we use the same timestamp for both files to keep them in sync
-        filename = f"price_history_{product_id}_{timestamp}.png"
-        filepath = os.path.join(static_dir, filename)
-        
         try:
-            # Save both formats
+            # Save both formats locally
             fig.write_image(filepath)
             fig.write_html(html_filepath)
             
-            logger.info(f"Price history chart generated for {product.name} and saved as {filename} and {html_filename}")
-            # Add a flag to indicate that HTML is available
-            return filename
+            logger.info(f"Price history chart generated for {product.name} and saved locally")
+            return f"static/img/{filename}"  # Return relative path
         except Exception as e:
             logger.error(f"Error saving chart files: {e}")
             # Try to save just the PNG if HTML fails
             try:
                 fig.write_image(filepath)
-                logger.info(f"Fallback: Only PNG version saved as {filename}")
-                return filename
+                logger.info(f"Fallback: Only PNG version saved locally")
+                return f"static/img/{filename}"
             except:
                 logger.error("Failed to save any chart format")
                 return None
@@ -273,35 +282,44 @@ def generate_stock_history_chart(product_id, days=30):
         static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'img')
         os.makedirs(static_dir, exist_ok=True)
         
-        # Save the plot as a PNG file
-        filename = f"stock_history_{product_id}_{int(time.time())}.png"
-        filepath = os.path.join(static_dir, filename)
-        fig.write_image(filepath)
-        
-        # Generate an HTML version for interactive viewing
+        # Generate filenames with timestamp
         timestamp = int(time.time())
+        filename = f"stock_history_{product_id}_{timestamp}.png"
         html_filename = f"stock_history_{product_id}_{timestamp}.html"
+        
+        # Check if S3 storage is available
+        from utils.s3_storage import s3_storage
+        
+        if s3_storage.is_enabled():
+            try:
+                # Upload directly to S3
+                png_url = s3_storage.upload_plotly_figure(fig, filename, format='png')
+                html_url = s3_storage.upload_plotly_figure(fig, html_filename, format='html')
+                
+                logger.info(f"Stock history charts uploaded to S3 for {product.name}")
+                return png_url  # Return the URL of the PNG file
+            except Exception as e:
+                logger.error(f"Error uploading charts to S3: {e}")
+                # Fall back to local storage
+        
+        # Local storage fallback
+        filepath = os.path.join(static_dir, filename)
         html_filepath = os.path.join(static_dir, html_filename)
         
-        # Ensure we use the same timestamp for both files to keep them in sync
-        filename = f"stock_history_{product_id}_{timestamp}.png"
-        filepath = os.path.join(static_dir, filename)
-        
         try:
-            # Save both formats
+            # Save both formats locally
             fig.write_image(filepath)
             fig.write_html(html_filepath)
             
-            logger.info(f"Stock history chart generated for {product.name} and saved as {filename} and {html_filename}")
-            # Add a flag to indicate that HTML is available
-            return filename
+            logger.info(f"Stock history chart generated for {product.name} and saved locally")
+            return f"static/img/{filename}"  # Return relative path
         except Exception as e:
             logger.error(f"Error saving chart files: {e}")
             # Try to save just the PNG if HTML fails
             try:
                 fig.write_image(filepath)
-                logger.info(f"Fallback: Only PNG version saved as {filename}")
-                return filename
+                logger.info(f"Fallback: Only PNG version saved locally")
+                return f"static/img/{filename}"
             except:
                 logger.error("Failed to save any chart format")
                 return None
