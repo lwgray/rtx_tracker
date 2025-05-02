@@ -362,3 +362,62 @@
 2025-05-01 14:21:30 - RTX_Tracker - INFO - Starting monitoring service
 2025-05-01 14:21:32 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
 2025-05-01 14:21:32 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:30:20 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:20 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:20 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:30:20 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 14:30:28 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:28 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:28 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 14:30:28 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:30:34 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:34 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:34 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 14:30:34 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:30:45 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:45 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 14:30:45 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:45 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:30:53 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:53 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 14:30:54 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:30:54 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:31:04 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:31:04 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 14:31:05 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 14:31:05 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 15:58:25 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 15:58:25 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 15:58:25 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 15:58:28 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 15:58:28 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 15:58:28 - RTX_Tracker - INFO - Starting monitoring service
+2025-05-01 15:58:30 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 15:58:30 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 15:58:30 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 15:58:30 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 16:09:21 - RTX_Tracker - INFO - Starting B&H Photo scraper test
+2025-05-01 16:11:56 - RTX_Tracker - INFO - Starting Amazon scraper test
+2025-05-01 16:11:56 - RTX_Tracker - WARNING - No RTX 5090 products found at B&H Photo
+2025-05-01 16:11:56 - RTX_Tracker - INFO - Test complete
+2025-05-01 16:18:25 - RTX_Tracker - INFO - Starting B&H Photo removal script
+2025-05-01 16:18:25 - RTX_Tracker - INFO - Found 0 products from B&H Photo
+2025-05-01 16:18:25 - RTX_Tracker - INFO - Removing retailer: B&H Photo
+2025-05-01 16:18:25 - RTX_Tracker - INFO - Successfully removed B&H Photo and related data from the database
+2025-05-01 16:18:25 - RTX_Tracker - INFO - Script completed
+2025-05-01 16:21:22 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 16:21:22 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 16:21:23 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 16:21:23 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 16:21:23 - RTX_Tracker - INFO - Starting monitoring service
+2025-05-01 16:21:23 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 16:21:24 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 16:21:24 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 16:21:26 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 16:21:26 - RTX_Tracker - INFO - Starting Dash analytics dashboard
+2025-05-01 16:22:50 - RTX_Tracker - WARNING - No RTX 5090 products found on Amazon
+2025-05-01 16:22:50 - RTX_Tracker - INFO - Test complete
+2025-05-01 20:05:50 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 20:05:50 - RTX_Tracker - INFO - Starting RTX 5090 Stock Tracker
+2025-05-01 20:05:50 - RTX_Tracker - INFO - Starting Flask web interface
+2025-05-01 20:05:50 - RTX_Tracker - INFO - Starting Dash analytics dashboard

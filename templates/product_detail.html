@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} - RTX 5090 Stock Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .in-stock {
             color: green;
@@ -29,9 +30,22 @@
             border-radius: 4px;
             padding: 20px;
             margin-bottom: 20px;
+            width: 100%;
+            min-height: 500px;
         }
         .recommendation-card {
             border-left: 4px solid #28a745;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        .fallback-message {
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -129,12 +143,16 @@
                     <div class="card-body">
                         {% if price_chart %}
                         <div class="chart-container">
-                            <!-- Use iframe for interactive HTML chart -->
-                            <iframe src="{{ url_for('static', filename='img/' + price_chart.replace('.png', '.html')) }}" 
-                                    width="100%" height="500px" frameborder="0"></iframe>
+                            <img src="{{ url_for('static', filename='img/' + price_chart) }}" alt="Price History Chart" class="img-fluid" style="width: 100%;" 
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load price history chart. Please try refreshing the page.</div>'">
                         </div>
                         {% else %}
-                        <p>Not enough price history data available yet to generate a chart. Check back after more data is collected.</p>
+                        <div class="fallback-message">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <p>Not enough price history data available yet to generate a chart. Check back after more data is collected.</p>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -150,10 +168,16 @@
                     <div class="card-body">
                         {% if stock_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + stock_chart) }}" alt="Stock History Chart" class="img-fluid">
+                            <img src="{{ url_for('static', filename='img/' + stock_chart) }}" alt="Stock History Chart" class="img-fluid"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load stock history chart. Please try refreshing the page.</div>'">
                         </div>
                         {% else %}
-                        <p>Not enough stock history data available to generate a chart.</p>
+                        <div class="fallback-message">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <p>Not enough stock history data available to generate a chart. Check back after more data is collected.</p>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -169,7 +193,8 @@
                     <div class="card-body">
                         {% if prediction_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + prediction_chart) }}" alt="Price Prediction Chart" class="img-fluid">
+                            <img src="{{ url_for('static', filename='img/' + prediction_chart) }}" alt="Price Prediction Chart" class="img-fluid"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load price prediction chart. Please try refreshing the page.</div>'">
                         </div>
                         
                         <h4>Predicted Prices</h4>
@@ -190,7 +215,9 @@
                             </tbody>
                         </table>
                         {% else %}
-                        <p>Not enough data available to generate price predictions.</p>
+                        <div class="fallback-message">
+                            <p>Not enough data available to generate price predictions.</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -204,7 +231,8 @@
                     <div class="card-body">
                         {% if stock_prediction_chart %}
                         <div class="chart-container">
-                            <img src="{{ url_for('static', filename='img/' + stock_prediction_chart) }}" alt="Stock Prediction Chart" class="img-fluid">
+                            <img src="{{ url_for('static', filename='img/' + stock_prediction_chart) }}" alt="Stock Prediction Chart" class="img-fluid"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Unable to load stock prediction chart. Please try refreshing the page.</div>'">
                         </div>
                         
                         <h4>Predicted Stock Availability</h4>
@@ -225,7 +253,9 @@
                             </tbody>
                         </table>
                         {% else %}
-                        <p>Not enough data available to generate stock predictions.</p>
+                        <div class="fallback-message">
+                            <p>Not enough data available to generate stock predictions.</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -240,5 +270,29 @@
     </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add a script to handle general page errors and ensure charts load correctly
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for any broken images and display error messages
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                if (!img.complete || img.naturalHeight === 0) {
+                    img.onerror();
+                }
+            });
+
+            // Add a global error handler
+            window.addEventListener('error', function(e) {
+                console.error('Page error:', e.message);
+                if (e.target.tagName === 'IMG') {
+                    // Handle image loading errors
+                    const container = e.target.closest('.chart-container');
+                    if (container) {
+                        container.innerHTML = '<div class="alert alert-warning">Unable to load chart. Please try refreshing the page.</div>';
+                    }
+                }
+            }, true);
+        });
+    </script>
 </body>
 </html>

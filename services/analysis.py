@@ -53,6 +53,18 @@ def generate_price_history_chart(product_id, days=30):
         dates = [ph.timestamp for ph in price_history]
         prices = [ph.price for ph in price_history]
         
+        # Ensure we have enough data points for a meaningful chart (at least 2)
+        if len(dates) < 2:
+            logger.warning(f"Not enough price history data points for product ID {product_id}")
+            # Add a synthetic second point to allow chart creation
+            if len(dates) == 1:
+                # Add a second point 1 day later with the same price
+                dates.append(dates[0] + datetime.timedelta(days=1))
+                prices.append(prices[0])
+            else:
+                # No data points, can't generate a chart
+                return None
+        
         # Create DataFrame for plotting
         df = pd.DataFrame({
             'Date': dates,
@@ -125,12 +137,32 @@ def generate_price_history_chart(product_id, days=30):
         fig.write_image(filepath)
         
         # Generate an HTML version for interactive viewing
-        html_filename = f"price_history_{product_id}_{int(time.time())}.html"
+        timestamp = int(time.time())
+        html_filename = f"price_history_{product_id}_{timestamp}.html"
         html_filepath = os.path.join(static_dir, html_filename)
-        fig.write_html(html_filepath)
         
-        logger.info(f"Price history chart generated for {product.name} and saved as {filename}")
-        return filename
+        # Ensure we use the same timestamp for both files to keep them in sync
+        filename = f"price_history_{product_id}_{timestamp}.png"
+        filepath = os.path.join(static_dir, filename)
+        
+        try:
+            # Save both formats
+            fig.write_image(filepath)
+            fig.write_html(html_filepath)
+            
+            logger.info(f"Price history chart generated for {product.name} and saved as {filename} and {html_filename}")
+            # Add a flag to indicate that HTML is available
+            return filename
+        except Exception as e:
+            logger.error(f"Error saving chart files: {e}")
+            # Try to save just the PNG if HTML fails
+            try:
+                fig.write_image(filepath)
+                logger.info(f"Fallback: Only PNG version saved as {filename}")
+                return filename
+            except:
+                logger.error("Failed to save any chart format")
+                return None
     
     except Exception as e:
         logger.error(f"Error generating price history chart: {e}")
@@ -176,6 +208,18 @@ def generate_stock_history_chart(product_id, days=30):
         # Prepare data for plotting
         dates = [sh.timestamp for sh in stock_history]
         stocks = [1 if sh.in_stock else 0 for sh in stock_history]
+        
+        # Ensure we have enough data points for a meaningful chart (at least 2)
+        if len(dates) < 2:
+            logger.warning(f"Not enough stock history data points for product ID {product_id}")
+            # Add a synthetic second point to allow chart creation
+            if len(dates) == 1:
+                # Add a second point 1 day later with the same stock status
+                dates.append(dates[0] + datetime.timedelta(days=1))
+                stocks.append(stocks[0])
+            else:
+                # No data points, can't generate a chart
+                return None
         
         # Create DataFrame for plotting
         df = pd.DataFrame({
@@ -235,12 +279,32 @@ def generate_stock_history_chart(product_id, days=30):
         fig.write_image(filepath)
         
         # Generate an HTML version for interactive viewing
-        html_filename = f"stock_history_{product_id}_{int(time.time())}.html"
+        timestamp = int(time.time())
+        html_filename = f"stock_history_{product_id}_{timestamp}.html"
         html_filepath = os.path.join(static_dir, html_filename)
-        fig.write_html(html_filepath)
         
-        logger.info(f"Stock history chart generated for {product.name} and saved as {filename}")
-        return filename
+        # Ensure we use the same timestamp for both files to keep them in sync
+        filename = f"stock_history_{product_id}_{timestamp}.png"
+        filepath = os.path.join(static_dir, filename)
+        
+        try:
+            # Save both formats
+            fig.write_image(filepath)
+            fig.write_html(html_filepath)
+            
+            logger.info(f"Stock history chart generated for {product.name} and saved as {filename} and {html_filename}")
+            # Add a flag to indicate that HTML is available
+            return filename
+        except Exception as e:
+            logger.error(f"Error saving chart files: {e}")
+            # Try to save just the PNG if HTML fails
+            try:
+                fig.write_image(filepath)
+                logger.info(f"Fallback: Only PNG version saved as {filename}")
+                return filename
+            except:
+                logger.error("Failed to save any chart format")
+                return None
     
     except Exception as e:
         logger.error(f"Error generating stock history chart: {e}")

@@ -30,7 +30,7 @@ def load_config():
         'MONITORING_INTERVAL': int(os.getenv('MONITORING_INTERVAL', 60)),  # minutes
         
         # Web dashboard settings
-        'PORT': int(os.getenv('PORT', 5000)),
+        'PORT': int(os.getenv('PORT', 5003)),
         'DEBUG': os.getenv('DEBUG', 'False').lower() == 'true',
         
         # Product URLs

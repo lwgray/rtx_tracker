@@ -1,0 +1,65 @@
+{
+  "name": "RTX 5090 Stock Tracker",
+  "description": "A web application that tracks RTX 5090 stock and prices across multiple retailers",
+  "keywords": ["python", "flask", "stock tracker", "rtx 5090", "prices"],
+  "website": "https://github.com/lwgray/rtx_tracker",
+  "repository": "https://github.com/lwgray/rtx_tracker",
+  "success_url": "/",
+  "scripts": {
+    "postdeploy": "python reset_database.py"
+  },
+  "env": {
+    "SECRET_KEY": {
+      "description": "A secret key for verifying the integrity of signed cookies",
+      "generator": "secret"
+    },
+    "DATABASE_URL": {
+      "description": "The URL for the PostgreSQL database",
+      "value": "postgresql://postgres:postgres@localhost:5432/rtx_tracker"
+    },
+    "SMTP_SERVER": {
+      "description": "SMTP server for sending email alerts",
+      "value": "smtp.gmail.com"
+    },
+    "SMTP_PORT": {
+      "description": "SMTP port for email server",
+      "value": "587"
+    },
+    "SMTP_USERNAME": {
+      "description": "SMTP username for email alerts",
+      "value": ""
+    },
+    "SMTP_PASSWORD": {
+      "description": "SMTP password for email alerts",
+      "value": ""
+    },
+    "FROM_EMAIL": {
+      "description": "Email address to send alerts from",
+      "value": ""
+    },
+    "TO_EMAIL": {
+      "description": "Email address to send alerts to",
+      "value": ""
+    },
+    "ALERT_PRICE_THRESHOLD": {
+      "description": "Price threshold for price drop alerts",
+      "value": "2500"
+    },
+    "MONITORING_INTERVAL": {
+      "description": "Interval in minutes between monitoring runs",
+      "value": "60"
+    },
+    "DEBUG": {
+      "description": "Enable debug mode",
+      "value": "False"
+    }
+  },
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}

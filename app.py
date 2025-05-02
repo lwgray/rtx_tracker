@@ -29,7 +29,11 @@ def create_flask_app():
         static_folder='static',
         template_folder='templates'
     )
-    app.secret_key = os.urandom(24)
+    app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
+    
+    # Ensure static/img directory exists
+    static_img_dir = os.path.join(os.path.dirname(__file__), 'static', 'img')
+    os.makedirs(static_img_dir, exist_ok=True)
     
     # Set up routes
     @app.route('/test')
@@ -88,6 +92,24 @@ def create_flask_app():
     
     @app.route('/product/<int:product_id>')
     def product_detail(product_id):
+        # Check if static/img directory exists and is writable
+        static_img_dir = os.path.join(os.path.dirname(__file__), 'static', 'img')
+        if not os.path.exists(static_img_dir):
+            try:
+                os.makedirs(static_img_dir, exist_ok=True)
+                logger.info(f"Created static/img directory at {static_img_dir}")
+            except Exception as e:
+                logger.error(f"Could not create static/img directory: {e}")
+        
+        try:
+            # Verify read/write access by creating a test file
+            test_file = os.path.join(static_img_dir, 'test_write.txt')
+            with open(test_file, 'w') as f:
+                f.write('test')
+            os.remove(test_file)
+        except Exception as e:
+            logger.error(f"Static directory is not writable: {e}")
+        
         session = get_session()
         
         try:
@@ -114,8 +136,30 @@ def create_flask_app():
                 .first()
             
             # Generate charts
-            price_chart = generate_price_history_chart(product_id)
-            stock_chart = generate_stock_history_chart(product_id)
+            # Add error handling for chart generation
+            try:
+                price_chart = generate_price_history_chart(product_id)
+                # Verify the file actually exists
+                if price_chart:
+                    chart_path = os.path.join(os.path.dirname(__file__), 'static', 'img', price_chart)
+                    if not os.path.exists(chart_path):
+                        logger.error(f"Price chart file does not exist on disk: {chart_path}")
+                        price_chart = None
+            except Exception as e:
+                logger.error(f"Error generating price chart: {e}")
+                price_chart = None
+                
+            try:
+                stock_chart = generate_stock_history_chart(product_id)
+                # Verify the file actually exists
+                if stock_chart:
+                    chart_path = os.path.join(os.path.dirname(__file__), 'static', 'img', stock_chart)
+                    if not os.path.exists(chart_path):
+                        logger.error(f"Stock chart file does not exist on disk: {chart_path}")
+                        stock_chart = None
+            except Exception as e:
+                logger.error(f"Error generating stock chart: {e}")
+                stock_chart = None
             
             # Generate predictions
             prediction_result = predict_price_trend(product_id)

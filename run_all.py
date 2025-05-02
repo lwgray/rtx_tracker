@@ -43,7 +43,7 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)  # termination signal
     
     # Start Flask app in a separate process
-    flask_cmd = [sys.executable, "app.py", "--flask"]
+    flask_cmd = [sys.executable, "app.py", "--flask", "--port", "5003"]
     flask_process = subprocess.Popen(flask_cmd)
     processes.append(flask_process)
     print("Flask app started (PID: {})".format(flask_process.pid))
@@ -52,7 +52,7 @@ def main():
     time.sleep(2)
     
     # Start Dash app in a separate process
-    dash_cmd = [sys.executable, "app.py", "--dash"]
+    dash_cmd = [sys.executable, "app.py", "--dash", "--port", "8050"]
     dash_process = subprocess.Popen(dash_cmd)
     processes.append(dash_process)
     print("Dash app started (PID: {})".format(dash_process.pid))
@@ -64,7 +64,7 @@ def main():
     print("Monitoring service started (PID: {})".format(monitor_process.pid))
     
     print("\nAll components started successfully!")
-    print("- Flask app is running at: http://localhost:5000/")
+    print("- Flask app is running at: http://localhost:5003/")
     print("- Dash app is running at: http://localhost:8050/dashboard/")
     print("\nPress Ctrl+C to shut down all components.")
     

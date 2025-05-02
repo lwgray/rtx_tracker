@@ -12,10 +12,7 @@ https://www.newegg.com/p/pl?d=rtx+5090
 3. **Micro Center**:
 https://www.microcenter.com/search/search_results.aspx?N=&cat=&Ntt=rtx+5090
 
-4. **B&H Photo**:
-https://www.bhphotovideo.com/c/search?q=rtx%205090
-
-5. **Amazon**:
+4. **Amazon**:
 https://www.amazon.com/s?k=rtx+5090
 
 Note that stock is extremely limited across all retailers, with many completely sold out. For the best chance of finding stock, it's recommended to set up stock alerts on these websites and check frequently for restocks.

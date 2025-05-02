@@ -10,7 +10,7 @@ from scrapers.best_buy import scrape_best_buy
 from scrapers.newegg import scrape_newegg
 from scrapers.amazon import scrape_amazon
 from scrapers.micro_center import scrape_micro_center
-from scrapers.bh_photo import scrape_bh_photo
+# Removed B&H Photo import
 from services.alerts import send_email_alert
 from utils.logger import get_logger
 
@@ -56,12 +56,7 @@ def monitor_rtx_5090():
             if price and in_stock and price < 2500:
                 send_email_alert(product, price, "Micro Center")
         
-        # B&H Photo
-        bh_photo = session.query(Retailer).filter_by(name="B&H Photo").first()
-        bh_photo_results = scrape_bh_photo(session, bh_photo)
-        for product, price, in_stock in bh_photo_results:
-            if price and in_stock and price < 2500:
-                send_email_alert(product, price, "B&H Photo")
+        # B&H Photo section removed
         
         logger.info("Completed RTX 5090 monitoring cycle")
     
